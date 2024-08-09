@@ -143,7 +143,7 @@ with col1:
             # Right Column: Simple table with checkboxes, thumbnails, titles, and descriptions
             if address and location:
                 with col2:
-                    st.header("Permitted Development Options", divider="orange")
+                    st.header("Permitted Development Options", divider=True)
 
                     # Create a table structure
                     for idx, row in enumerate(data):
