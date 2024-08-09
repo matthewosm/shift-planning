@@ -6,10 +6,8 @@ from xml.etree import ElementTree as ET
 import requests
 from PIL import Image
 
-im = Image.open("images/shift_square_icon.png")
 st.set_page_config(
     page_title="Shift Planning",
-    page_icon=im,
     layout="wide",
 )
 
