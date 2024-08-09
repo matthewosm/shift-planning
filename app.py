@@ -1,28 +1,24 @@
 import streamlit as st
-import csv
+import pandas as pd
 import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
 from xml.etree import ElementTree as ET
 import requests
 from PIL import Image
 
+im = Image.open("images/shift_square_icon.png")
 st.set_page_config(
     page_title="Shift Planning",
+    page_icon=im,
     layout="wide",
 )
 
-# Load the CSV file using the CSV module
+# Load the CSV file
 csv_file = 'permitted.csv'  # Replace with the correct path to your CSV file
-data = []
-
-with open(csv_file, newline='') as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        data.append(row)
+data = pd.read_csv(csv_file)
 
 # Replace this with your actual Google Maps API Key
 GOOGLE_API_KEY = st.secrets["GOOGLE_API"]
-
 # Function to get the session URL for Google Maps tiles
 def get_session_url(api_key):
     create_session_url = "https://tile.googleapis.com/v1/createSession"
@@ -59,7 +55,7 @@ def set_tile_layout(tile_url, lat, lon, zoom=17):
             layers=[{"below": 'traces',
                      "sourcetype": "raster",
                      "sourceattribution": "Google",
-                     "source": [tile_url]}],
+                     "source": [tile_url] }],
             center=dict(lat=lat, lon=lon),
             zoom=zoom),
         margin=dict(r=0, t=0, l=0, b=0),  # Remove margins
@@ -101,7 +97,8 @@ with col1:
     col1_1, col1_2 = st.columns([0.15, 0.85])
     with col1_1:
         st.image(
-            "https://www.shift-construction.com/wp-content/uploads/2024/05/shift-blue-logo-white-text-120x72.png",
+            "https://www.shift-construction.com/wp-content/uploads/2024/05/shift-blue-logo-white-text-120x72.png", 
+
             use_column_width=True,
         )
     with col1_2:
@@ -143,10 +140,11 @@ with col1:
             # Right Column: Simple table with checkboxes, thumbnails, titles, and descriptions
             if address and location:
                 with col2:
-                    st.header("Permitted Development Options", divider=True)
+                    st.header("Permitted Development Options", divider="orange")
+                    
 
                     # Create a table structure
-                    for idx, row in enumerate(data):
+                    for idx, row in data.iterrows():
                         col2_1, col2_2, col2_3, col2_4 = st.columns([0.05, 0.1, 0.2, 0.4])
 
                         # Determine if this checkbox should be checked
@@ -167,12 +165,18 @@ with col1:
                         with col2_4:
                             st.write(row['Description'])
 
+                    
+
+
+
+                            
+
                         # If this checkbox is checked, update the selected option and clear other selections
                         if checkbox:
                             st.session_state['selected_option'] = row['Permitted Development Options']
 
                             # Load the corresponding KML file
-                            lats, lons = parse_kml('kml/' + row['kml'])
+                            lats, lons = parse_kml('kml/'+row['kml'])
                             fig.add_trace(go.Scattermapbox(
                                 mode="lines",
                                 fill="toself",
