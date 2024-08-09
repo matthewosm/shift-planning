@@ -106,6 +106,7 @@ with col1:
     
     # Full height container
     address = st.text_input("Enter an address:", key="search")
+    st.write(f"To run prototype search for 10 Downing Street in the search bar above and use the checkboxes that appear in the list to the right to load the map overlays")
 
     if 'tiles_url' not in st.session_state:
         st.session_state.tiles_url = get_session_url(GOOGLE_API_KEY)
