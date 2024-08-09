@@ -18,7 +18,7 @@ csv_file = 'permitted.csv'  # Replace with the correct path to your CSV file
 data = pd.read_csv(csv_file)
 
 # Replace this with your actual Google Maps API Key
-GOOGLE_API_KEY = "AIzaSyBHrE81kIbeJ-viXABVcDFbRZdaaUZaG3M"
+GOOGLE_API_KEY = st.secrets["GOOGLE_API"]
 
 # Function to get the session URL for Google Maps tiles
 def get_session_url(api_key):
