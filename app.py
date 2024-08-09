@@ -19,7 +19,6 @@ data = pd.read_csv(csv_file)
 
 # Replace this with your actual Google Maps API Key
 GOOGLE_API_KEY = st.secrets["GOOGLE_API"]
-
 # Function to get the session URL for Google Maps tiles
 def get_session_url(api_key):
     create_session_url = "https://tile.googleapis.com/v1/createSession"
@@ -99,6 +98,7 @@ with col1:
     with col1_1:
         st.image(
             "https://www.shift-construction.com/wp-content/uploads/2024/05/shift-blue-logo-white-text-120x72.png", 
+
             use_column_width=True,
         )
     with col1_2:
@@ -107,6 +107,7 @@ with col1:
     # Full height container
     address = st.text_input("Enter an address:", key="search")
     st.markdown("> **Instructions:** To run prototype search for 10 Downing Street in the search bar above and use the checkboxes that appear in the list to the right to load the map overlays")
+
 
     if 'tiles_url' not in st.session_state:
         st.session_state.tiles_url = get_session_url(GOOGLE_API_KEY)
@@ -119,24 +120,21 @@ with col1:
                 st.session_state.map_center = {"lat": location.latitude, "lon": location.longitude}
                 st.session_state.zoom = 17.5  # Updated zoom level
             
-            # Create the figure layout only if not already created
-            if 'map_fig' not in st.session_state:
-                st.session_state.map_fig = go.Figure(layout=set_tile_layout(st.session_state.tiles_url,
-                                                                            st.session_state.map_center["lat"],
-                                                                            st.session_state.map_center["lon"],
-                                                                            st.session_state.zoom))
+            # Create the figure with the location and Google Maps tiles
+            fig = go.Figure(layout=set_tile_layout(st.session_state.tiles_url,
+                                                   st.session_state.map_center["lat"],
+                                                   st.session_state.map_center["lon"],
+                                                   st.session_state.zoom))
 
             # Add a marker for the searched address
-            if 'marker_added' not in st.session_state:
-                st.session_state.map_fig.add_trace(go.Scattermapbox(
-                    mode="markers",
-                    lat=[location.latitude],
-                    lon=[location.longitude],
-                    name='Location',
-                    marker=dict(size=10, color='red'),
-                    text=[location.address]
-                ))
-                st.session_state.marker_added = True  # Prevent duplicate markers
+            fig.add_trace(go.Scattermapbox(
+                mode="markers",
+                lat=[location.latitude],
+                lon=[location.longitude],
+                name='Location',
+                marker=dict(size=10, color='red'),
+                text=[location.address]
+            ))
 
             # Track the selected option
             selected_option = st.session_state.get('selected_option', None)
@@ -145,6 +143,7 @@ with col1:
             if address and location:
                 with col2:
                     st.header("Permitted Development Options", divider="orange")
+                    
 
                     # Create a table structure
                     for idx, row in data.iterrows():
@@ -168,13 +167,19 @@ with col1:
                         with col2_4:
                             st.write(row['Description'])
 
+                    
+
+
+
+                            
+
                         # If this checkbox is checked, update the selected option and clear other selections
                         if checkbox:
                             st.session_state['selected_option'] = row['Permitted Development Options']
 
-                            # Load the corresponding KML file and add to the map
+                            # Load the corresponding KML file
                             lats, lons = parse_kml('kml/'+row['kml'])
-                            st.session_state.map_fig.add_trace(go.Scattermapbox(
+                            fig.add_trace(go.Scattermapbox(
                                 mode="lines",
                                 fill="toself",
                                 lat=lats,
@@ -183,10 +188,9 @@ with col1:
                                 line=dict(width=2, color='blue'),
                                 fillcolor='rgba(0, 0, 255, 0.2)'
                             ))
-
                         elif selected_option == row['Permitted Development Options']:
                             # If unchecked, clear the selection
                             st.session_state['selected_option'] = None
 
             # Refresh the map to display the selected KML polygon
-            st.plotly_chart(st.session_state.map_fig, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
